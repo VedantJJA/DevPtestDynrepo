@@ -1,13 +1,17 @@
 // DevPanel Test App - Interactive Frontend Client Logic
 
-// Calculate default backend API host based on environment
 const getBackendUrl = () => {
   // If running locally on dev port (3000/5500), hit backend port 8080 directly
   if (window.location.port === '3000' || window.location.port === '5500' || window.location.hostname === 'localhost') {
     return 'http://localhost:8080';
   }
   // If hosted on DevPanel subpath: http://140.245.116.79/app/devpanel-test-app/
-  return window.location.origin;
+  // The frontend needs to point to the exact same subpath for API routing
+  let path = window.location.pathname;
+  if (path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
+  return window.location.origin + path;
 };
 
 const BACKEND_URL = getBackendUrl();
