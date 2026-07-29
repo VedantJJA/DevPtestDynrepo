@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevPanel Multi-Tier Test Suite & Dashboard</title>
+  <meta name="description" content="Interactive test dashboard and verification platform for DevPanel PaaS multi-tier deployments.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-glow glow-1"></div>
+  <div class="background-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header & Navigation -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-logo">
+          <span class="logo-icon">⚡</span>
+        </div>
+        <div>
+          <h1 class="brand-title">DevPanel <span class="badge-tag">PaaS v1.0</span></h1>
+          <p class="brand-subtitle">Multi-Tier Microservice Test Blueprint Dashboard</p>
+        </div>
+      </div>
+      <div class="access-info-panel">
+        <div class="info-chip" id="access-url-chip">
+          <span class="chip-label">Access Pattern:</span>
+          <span class="chip-value" id="access-pattern-text">http://140.245.116.79/app/devpanel-test-app/</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Overview Banner -->
+    <section class="hero-banner">
+      <div class="hero-content">
+        <h2>Declarative Deployment Verification</h2>
+        <p>This application validates end-to-end multi-container orchestration defined in <code>devpanel.yaml</code> including static asset compilation, Node.js REST API routing, PostgreSQL persistent storage, and Redis caching.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="btn-refresh-status" class="btn btn-primary">
+          <span class="btn-icon">🔄</span> Refresh Diagnostics
+        </button>
+        <button id="btn-test-cache" class="btn btn-secondary">
+          <span class="btn-icon">⚡</span> Test Redis Cache
+        </button>
+      </div>
+    </section>
+
+    <!-- Services Status Grid -->
+    <section class="section">
+      <h2 class="section-title">Microservice Cluster Topology</h2>
+      <div class="service-grid">
+        
+        <!-- Service Card: Frontend -->
+        <div class="card service-card" id="card-frontend-service">
+          <div class="card-header">
+            <div class="service-type-badge static">TYPE: STATIC</div>
+            <span class="status-indicator active" id="indicator-frontend"></span>
+          </div>
+          <h3 class="service-name">frontend</h3>
+          <p class="service-desc">Single Page App (Nginx compiled via Node build engine)</p>
+          <div class="service-meta">
+            <div class="meta-row"><span>Directory:</span> <code>web/</code></div>
+            <div class="meta-row"><span>Output Dir:</span> <code>dist/</code></div>
+            <div class="meta-row"><span>Domain:</span> <code>testapp.devpanel.local</code></div>
+          </div>
+        </div>
+
+        <!-- Service Card: Backend -->
+        <div class="card service-card" id="card-backend-service">
+          <div class="card-header">
+            <div class="service-type-badge web">TYPE: WEB API</div>
+            <span class="status-indicator" id="indicator-backend"></span>
+          </div>
+          <h3 class="service-name">backend</h3>
+          <p class="service-desc">Node.js Express REST API (Docker build engine)</p>
+          <div class="service-meta">
+            <div class="meta-row"><span>Port:</span> <code>8080</code></div>
+            <div class="meta-row"><span>Resources:</span> <code>1.0 CPU / 512M RAM</code></div>
+            <div class="meta-row"><span>Health Status:</span> <strong id="backend-health-text">Checking...</strong></div>
+          </div>
+        </div>
+
+        <!-- Service Card: Database -->
+        <div class="card service-card" id="card-database-service">
+          <div class="card-header">
+            <div class="service-type-badge database">TYPE: DATABASE</div>
+            <span class="status-indicator" id="indicator-database"></span>
+          </div>
+          <h3 class="service-name">database</h3>
+          <p class="service-desc">PostgreSQL 15 Alpine (Docker Hub image)</p>
+          <div class="service-meta">
+            <div class="meta-row"><span>Port:</span> <code>5432</code></div>
+            <div class="meta-row"><span>Volume:</span> <code>pg_data 👉 /var/lib/postgresql/data</code></div>
+            <div class="meta-row"><span>Connection:</span> <strong id="db-conn-text">Checking...</strong></div>
+          </div>
+        </div>
+
+        <!-- Service Card: Redis -->
+        <div class="card service-card" id="card-redis-service">
+          <div class="card-header">
+            <div class="service-type-badge database">TYPE: DATABASE</div>
+            <span class="status-indicator" id="indicator-redis"></span>
+          </div>
+          <h3 class="service-name">redis-cache</h3>
+          <p class="service-desc">Redis 7 Alpine (In-memory storage)</p>
+          <div class="service-meta">
+            <div class="meta-row"><span>Port:</span> <code>6379</code></div>
+            <div class="meta-row"><span>Memory Limit:</span> <code>Shared / Unlimited</code></div>
+            <div class="meta-row"><span>Status:</span> <strong id="redis-conn-text">Checking...</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Main Content Dual Grid: Database CRUD & Diagnostics -->
+    <div class="content-dual-grid">
+      
+      <!-- Column 1: Database CRUD Test Suite -->
+      <section class="card content-card" id="section-db-crud">
+        <div class="card-title-row">
+          <h3>PostgreSQL Persistent Notes Manager</h3>
+          <span class="badge" id="notes-count-badge">0 items</span>
+        </div>
+        <p class="card-sub">Create records below to verify SQL queries and persistent Docker volume mounts across container restarts.</p>
+
+        <!-- New Note Form -->
+        <form id="form-create-note" class="note-form">
+          <div class="form-group">
+            <input type="text" id="input-note-title" placeholder="Note Title (e.g., Deploy Feature X)" required>
+          </div>
+          <div class="form-row">
+            <input type="text" id="input-note-category" placeholder="Category (e.g., DevOps, API)" value="General">
+            <button type="submit" id="btn-submit-note" class="btn btn-accent">Save Record</button>
+          </div>
+          <div class="form-group">
+            <textarea id="input-note-content" rows="2" placeholder="Note Content / Payload details..." required></textarea>
+          </div>
+        </form>
+
+        <!-- Notes List Container -->
+        <div id="notes-list-container" class="notes-list">
+          <div class="loading-spinner" id="notes-loading">Loading database notes...</div>
+        </div>
+      </section>
+
+      <!-- Column 2: API Diagnostics & Environment Visualizer -->
+      <section class="card content-card" id="section-diagnostics">
+        <div class="card-title-row">
+          <h3>API Diagnostics & Config Inspector</h3>
+          <button id="btn-ping-health" class="btn btn-sm btn-secondary">Ping /api/health</button>
+        </div>
+
+        <div class="diagnostic-block">
+          <h4>Backend Response Inspector</h4>
+          <pre id="json-response-viewer">Click "Refresh Diagnostics" or "Ping /api/health" to inspect live backend JSON payload.</pre>
+        </div>
+
+        <div class="diagnostic-block">
+          <h4>Configured Environment & Volume Mounts</h4>
+          <div class="env-table">
+            <div class="env-row"><span class="env-key">DB_HOST</span><span class="env-val" id="env-db-host">database</span></div>
+            <div class="env-row"><span class="env-key">DB_PORT</span><span class="env-val">5432</span></div>
+            <div class="env-row"><span class="env-key">DB_PASS</span><span class="env-val secret">•••••••• (Secret: postgres_password)</span></div>
+            <div class="env-row"><span class="env-key">REDIS_HOST</span><span class="env-val">redis-cache</span></div>
+            <div class="env-row"><span class="env-key">VOLUME_MOUNT</span><span class="env-val">pg_data ➔ /var/lib/postgresql/data</span></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>DevPanel PaaS Test Application Blueprint • Version 1.0 • Built with Node.js, Express, PostgreSQL, Redis & CSS Glassmorphism</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+version: "1.0"
+project: "devpanel-test-app"
+
+services:
+  # --------------------------------------------------
+  # 1. Frontend Static Application (Static Dashboard)
+  # --------------------------------------------------
+  frontend:
+    type: static
+    source:
+      repo: "self"
+      branch: "main"
+      directory: "web"
+    build:
+      engine: "node"
+      command: "npm install && npm run build"
+      output_dir: "dist"
+    domains:
+      - "testapp.devpanel.local"
+
+  # --------------------------------------------------
+  # 2. Backend API Service (Node.js REST API)
+  # --------------------------------------------------
+  backend:
+    type: web
+    source:
+      repo: "self"
+      branch: "main"
+      directory: "api"
+    build:
+      engine: "dockerfile"
+      dockerfile_path: "Dockerfile"
+      args:
+        NODE_ENV: "production"
+    deploy:
+      port: 8080
+      command: "npm start"
+    resources:
+      cpu_limit: "1.0"
+      mem_limit: "512m"
+    env:
+      - key: PORT
+        value: "8080"
+      - key: DB_HOST
+        value: "database"
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        value: "postgres"
+      - key: DB_PASS
+        secret: "postgres_password"
+      - key: DB_NAME
+        value: "appdb"
+      - key: REDIS_HOST
+        value: "redis-cache"
+      - key: REDIS_PORT
+        value: "6379"
+
+  # --------------------------------------------------
+  # 3. Relational Database (PostgreSQL)
+  # --------------------------------------------------
+  database:
+    type: database
+    image: "postgres:15-alpine"
+    deploy:
+      port: 5432
+    volumes:
+      - name: "pg_data"
+        mount_path: "/var/lib/postgresql/data"
+    env:
+      - key: POSTGRES_DB
+        value: "appdb"
+      - key: POSTGRES_USER
+        value: "postgres"
+      - key: POSTGRES_PASSWORD
+        secret: "postgres_password"
+
+  # --------------------------------------------------
+  # 4. In-Memory Cache (Redis)
+  # --------------------------------------------------
+  redis-cache:
+    type: database
+    image: "redis:7-alpine"
+    deploy:
+      port: 6379

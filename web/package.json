@@ -1,0 +1,12 @@
+{
+  "name": "devpanel-frontend-web",
+  "version": "1.0.0",
+  "description": "DevPanel Static Frontend Dashboard",
+  "scripts": {
+    "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('dist')) fs.mkdirSync('dist'); ['index.html','style.css','app.js'].forEach(f => fs.copyFileSync(f, 'dist/' + f)); console.log('✅ Static build complete in web/dist!');\"",
+    "start": "npx serve dist -p 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
+  }
+}
