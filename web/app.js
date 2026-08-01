@@ -1,17 +1,18 @@
 // DevPanel Test App - Interactive Frontend Client Logic
 
 const getBackendUrl = () => {
-  // If running locally on dev port (3000/5500), hit backend port 8080 directly
-  if (window.location.port === '3000' || window.location.port === '5500' || window.location.hostname === 'localhost') {
+  const path = window.location.pathname;
+  // If hosted under DevPanel path routing: /app/<project>/<service>/ or /app/<project>/
+  if (path.includes('/app/')) {
+    const parts = path.split('/app/')[1].split('/').filter(Boolean);
+    const projectName = parts[0];
+    return `${window.location.origin}/app/${projectName}/backend`;
+  }
+  // If running locally on standalone dev ports (3000/5500)
+  if (window.location.port === '3000' || window.location.port === '5500') {
     return 'http://localhost:8080';
   }
-  // If hosted on DevPanel subpath: http://140.245.116.79/app/devpanel-test-app/
-  // The frontend needs to point to the exact same subpath for API routing
-  let path = window.location.pathname;
-  if (path.endsWith('/')) {
-    path = path.slice(0, -1);
-  }
-  return window.location.origin + path;
+  return 'http://localhost:8080';
 };
 
 const BACKEND_URL = getBackendUrl();
