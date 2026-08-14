@@ -1,0 +1,52 @@
+services:
+  # 1. Frontend Web Service
+  - type: web
+    name: devpanel-frontend
+    runtime: static
+    rootDir: web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: API_URL
+        value: https://devpanel-backend.klouds.online
+
+  # 2. Backend REST API
+  - type: web
+    name: devpanel-backend
+    runtime: node
+    rootDir: api
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: devpanel-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: devpanel-postgres
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: devpanel-postgres
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: devpanel-postgres
+          property: password
+      - key: DB_NAME
+        value: appdb
+      - key: REDIS_HOST
+        value: paas-db-devpanel-redis
+      - key: REDIS_PORT
+        value: "6379"
+
+databases:
+  - name: devpanel-postgres
+    databaseName: appdb
+    user: postgres
+    plan: starter
