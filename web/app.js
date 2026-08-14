@@ -1,17 +1,31 @@
 // DevPanel Test App - Interactive Frontend Client Logic
 
 const getBackendUrl = () => {
+  const host = window.location.hostname;
+  
+  // 1. Auto-discover backend when hosted under subdomain (e.g. devpanel-frontend.klouds.online -> devpanel-backend.klouds.online)
+  if (host.includes('-frontend.')) {
+    return window.location.origin.replace('-frontend.', '-backend.');
+  }
+
+  // 2. Check if runtime injected backend URL exists
+  if (window.__BACKEND_URL__) {
+    return window.__BACKEND_URL__;
+  }
+
+  // 3. Path routing fallback: /app/<project>/<service>/
   const path = window.location.pathname;
-  // If hosted under DevPanel path routing: /app/<project>/<service>/ or /app/<project>/
   if (path.includes('/app/')) {
     const parts = path.split('/app/')[1].split('/').filter(Boolean);
     const projectName = parts[0];
     return `${window.location.origin}/app/${projectName}/backend`;
   }
-  // If running locally on standalone dev ports (3000/5500)
+
+  // 4. Standalone dev mode
   if (window.location.port === '3000' || window.location.port === '5500') {
     return 'http://localhost:8080';
   }
+
   return 'http://localhost:8080';
 };
 
